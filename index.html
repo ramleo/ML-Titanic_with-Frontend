@@ -3,336 +3,490 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ml Titanic With Frontend</title>
+  <title>Titanic Survival Predictor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --primary:  #0d47a1;
-      --accent:   #1565c0;
-      --btn:      #1565c0;
-      --btn-hov:  #0d47a1;
-      --body-bg:  #e3f2fd;
+    * { font-family: 'Inter', sans-serif; }
+    body { min-height: 100vh; background: #080f1a; overflow-x: hidden; }
+
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0;
+      background: radial-gradient(ellipse at 15% 55%,rgba(13,71,161,.42) 0%,transparent 48%),radial-gradient(ellipse at 85% 15%,rgba(21,101,192,.36) 0%,transparent 45%),radial-gradient(ellipse at 55% 90%,rgba(13,71,161,.20) 0%,transparent 40%),radial-gradient(ellipse at 90% 65%,rgba(21,101,192,.15) 0%,transparent 38%),linear-gradient(145deg,#060c06 0%,#0d0820 50%,#070f0f 100%);
+      animation: meshAnim 14s ease-in-out infinite alternate;
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--body-bg); min-height: 100vh; color: #1a1a2e;
+    @keyframes meshAnim {
+      0%   { filter: hue-rotate(0deg)   brightness(1);    }
+      50%  { filter: hue-rotate(18deg)  brightness(1.06); }
+      100% { filter: hue-rotate(-12deg) brightness(0.94); }
     }
-    /* Header */
-    .hdr {
+
+    .hero {
       background: linear-gradient(135deg,rgba(13,71,161,.58) 0%,rgba(1,87,155,.65) 100%),url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1400&h=560&fit=crop&auto=format&q=85') center/cover no-repeat;
       background-size: cover;
       background-position: center;
-      color: white;
-      padding: 72px 32px 64px; text-align: center;
-      position: relative;
     }
-    .hdr h1 { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 2px 12px rgba(0,0,0,0.55); margin-bottom: 10px; }
-    .hdr p  { opacity: 0.95; margin-top: 0; font-size: 1.1rem; text-shadow: 0 1px 6px rgba(0,0,0,0.45); }
-    /* Container */
-    .ctr { max-width: 880px; margin: 0 auto; padding: 36px 20px 64px; }
-    /* Card */
-    .card {
-      background: white; border-radius: 20px;
-      box-shadow: 0 8px 36px rgba(0,0,0,0.10); padding: 36px;
+
+    .glass {
+      background: rgba(255,255,255,.055);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255,255,255,.11);
+      box-shadow: 0 8px 48px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.09);
     }
-    .card-ttl {
-      font-size: 1.1rem; font-weight: 700; color: var(--primary);
-      margin-bottom: 24px; border-bottom: 2px solid var(--body-bg);
-      padding-bottom: 14px;
-    }
-    /* Form grid */
-    .fgrid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 18px; margin-bottom: 28px;
-    }
-    .field label {
-      display: block; font-size: 0.73rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
-      color: #888; margin-bottom: 6px;
-    }
-    .field input {
+
+    .inp {
       width: 100%; padding: 11px 14px;
-      border: 2px solid #e8eaed; border-radius: 10px;
-      font-size: 0.97rem; color: #1a1a2e; outline: none;
-      background: #fafafa;
-      transition: border-color 0.18s, box-shadow 0.18s;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 10px; color: #fff;
+      font-size: .94rem; transition: all .2s; outline: none;
     }
-    .field input:focus {
-      border-color: var(--accent);
+    .inp::placeholder { color: rgba(255,255,255,.28); }
+    .inp:focus {
+      background: rgba(255,255,255,.11);
+      border-color: #1565c0;
       box-shadow: 0 0 0 3px #1565c033;
-      background: white;
     }
-    .field input::placeholder { color: #c0c0c0; }
-    /* Button */
-    .btn-p {
+    .inp-lbl {
+      display: block; font-size: .68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .09em;
+      color: rgba(255,255,255,.45); margin-bottom: 6px;
+    }
+
+    .btn-predict {
       width: 100%; padding: 15px;
-      background: var(--btn); color: white; border: none;
-      border-radius: 12px; font-size: 1.1rem; font-weight: 700;
-      cursor: pointer; letter-spacing: 0.02em;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-      transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+      background: linear-gradient(135deg, #1565c0 0%, #1565c0 100%);
+      border: none; border-radius: 12px; color: #fff;
+      font-size: 1rem; font-weight: 700; letter-spacing: .03em;
+      cursor: pointer; transition: all .22s; position: relative; overflow: hidden;
     }
-    .btn-p:hover  { background: var(--btn-hov); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
-    .btn-p:active { transform: scale(0.99); }
-    .btn-p:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; }
-    /* Result */
-    .result {
-      margin-top: 28px; padding: 24px 28px;
-      background: var(--body-bg); border-radius: 14px;
-      border-left: 5px solid var(--accent);
-      display: none; animation: slideIn 0.32s ease;
+    .btn-predict::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.13), transparent);
+      pointer-events: none;
     }
-    .result.show { display: block; }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to   { opacity: 1; transform: translateY(0); }
+    .btn-predict:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(0,0,0,.4);
+      background: linear-gradient(135deg, #0d47a1 0%, #1565c0 100%);
     }
-    .res-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
-    .res-lbl { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #aaa; }
-    .res-val { font-size: 2rem; font-weight: 800; color: var(--primary); }
-    /* Probability bars */
-    .prob-sec { margin-top: 18px; }
-    .prob-ttl { font-size: 0.73rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #bbb; margin-bottom: 12px; }
-    .prob-item { margin-bottom: 10px; }
-    .prob-hdr  { display: flex; justify-content: space-between; font-size: 0.85rem; color: #555; margin-bottom: 5px; font-weight: 500; }
-    .prob-bg   { height: 10px; background: #e5e7eb; border-radius: 5px; overflow: hidden; }
-    .prob-fill {
-      height: 10px; border-radius: 5px; background: var(--accent);
-      transition: width 0.6s cubic-bezier(.4,0,.2,1); width: 0;
+    .btn-predict:active  { transform: translateY(0); }
+    .btn-predict:disabled { opacity: .55; cursor: not-allowed; }
+
+    .conf-track {
+      height: 7px; background: rgba(255,255,255,.09);
+      border-radius: 99px; overflow: hidden;
     }
-    .err { color: #dc2626; font-size: 0.9rem; font-weight: 500; margin-top: 8px; }
-    /* Spinner */
-    .spin {
-      display: inline-block; width: 17px; height: 17px;
-      border: 3px solid rgba(255,255,255,0.35);
-      border-top-color: white; border-radius: 50%;
-      animation: rot 0.75s linear infinite;
-      vertical-align: middle; margin-right: 8px;
+    .conf-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #1565c0, #1565c0);
+      transition: width .9s cubic-bezier(.4,0,.2,1);
     }
-    @keyframes rot { to { transform: rotate(360deg); } }
-    /* Server status bar */
-    .srv-bar { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600; color: #666; margin-bottom: 20px; padding: 9px 14px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e8eaed; }
-    .srv-dot { width: 9px; height: 9px; border-radius: 50%; background: #d1d5db; flex-shrink: 0; transition: background 0.3s; }
-    .srv-dot.online  { background: #22c55e; }
-    .srv-dot.offline { background: #ef4444; }
-    .srv-dot.checking { animation: pulse 1s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-    /* Footer */
-    .ftr { text-align: center; padding: 28px; color: #ccc; font-size: 0.82rem; }
-    .ftr a { color: var(--accent); text-decoration: none; font-weight: 500; }
-    .ftr a:hover { text-decoration: underline; }
-    @media (max-width: 520px) {
-      .hdr h1 { font-size: 1.5rem; }
-      .card   { padding: 22px 16px; }
-      .res-val { font-size: 1.5rem; }
+
+    .mini-stat {
+      background: rgba(255,255,255,.045);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 10px; padding: 12px 10px; text-align: center;
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px;
+      background: rgba(13,71,161,.18);
+      border: 1px solid rgba(13,71,161,.40);
+      border-radius: 99px;
+      font-size: .72rem; font-weight: 700;
+      color: #1565c0; text-transform: uppercase; letter-spacing: .07em;
+    }
+
+    .srv-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #d1d5db; flex-shrink: 0; transition: background .3s;
+    }
+    .srv-dot.online   { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,.6); animation: blink 2.2s infinite; }
+    .srv-dot.offline  { background: #ef4444; }
+    .srv-dot.checking { background: #f59e0b; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:translateY(0);    }
+    }
+    .fade-up { animation: fadeUp .45s ease forwards; }
+
+    .spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff; border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .err-box {
+      background: rgba(220,38,38,.15); border: 1px solid rgba(220,38,38,.35);
+      border-radius: 10px; padding: 12px 14px;
+      color: #fca5a5; font-size: .875rem; white-space: pre-wrap;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      #mainGrid { grid-template-columns: 1fr !important; }
+      .hero-h1  { font-size: 2rem !important; }
     }
   </style>
 </head>
 <body>
 
-<div class="hdr">
-  <h1>Ml Titanic With Frontend</h1>
-  <p>AI-powered survival prediction</p>
-</div>
+  <div class="bg-mesh"></div>
 
-<div class="ctr">
-  <div class="card">
-    <div class="srv-bar">
-      <span class="srv-dot checking" id="srvDot"></span>
-      <span id="srvTxt">Checking serverâ¦</span>
+  <div style="position:relative;z-index:10;min-height:100vh">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div style="max-width:1024px;margin:0 auto;padding:64px 24px;text-align:center;color:#fff">
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:99px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(8px);font-size:.85rem;font-weight:600;margin-bottom:20px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block"></span>
+          Maritime
+        </div>
+        <h1 class="hero-h1" style="font-size:2.8rem;font-weight:900;letter-spacing:-0.5px;margin-bottom:14px;text-shadow:0 2px 24px rgba(0,0,0,.55)">
+          Titanic Survival Predictor
+        </h1>
+        <p style="color:rgba(255,255,255,.75);font-size:1.05rem;max-width:480px;margin:0 auto;text-shadow:0 1px 8px rgba(0,0,0,.4)">
+          AI-powered survival prediction
+        </p>
+      </div>
     </div>
-    <div class="card-ttl">Enter values and click Predict</div>
-    <form id="pForm">
-      <div class="fgrid">
-        <div class="field">
-          <label>Passengerid</label>
-          <input type="number" name="PassengerId" placeholder="e.g. 0" step="any">
+
+    <!-- Main content -->
+    <div style="max-width:1024px;margin:-32px auto 0;padding:0 16px 64px">
+
+      <!-- Server status -->
+      <div class="glass" style="display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:14px;margin-bottom:20px">
+        <span class="srv-dot checking" id="srvDot"></span>
+        <span style="color:rgba(255,255,255,.65);font-size:.83rem;font-weight:600" id="srvTxt">Checking server…</span>
+      </div>
+
+      <!-- Two-column grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" id="mainGrid">
+
+        <!-- LEFT: Input Form -->
+        <div class="glass" style="border-radius:20px;padding:28px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+            <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1565c0);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.3)">⚗</div>
+            <div>
+              <div style="color:#fff;font-weight:700;font-size:1.05rem">Feature Inputs</div>
+              <div style="color:rgba(255,255,255,.38);font-size:.82rem">Enter your feature values below</div>
+            </div>
+          </div>
+
+          <form id="pForm">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:20px">
+              
+          <div>
+            <label class="inp-lbl">Pclass</label>
+            <input type="number" name="Pclass" class="inp" placeholder="e.g. 0" step="any" min="0" required>
+          </div>
+          <div>
+            <label class="inp-lbl">Age</label>
+            <input type="number" name="Age" class="inp" placeholder="e.g. 0" step="any" min="0" required>
+          </div>
+          <div>
+            <label class="inp-lbl">Sib Sp</label>
+            <input type="number" name="SibSp" class="inp" placeholder="e.g. 0" step="any" min="0" required>
+          </div>
+          <div>
+            <label class="inp-lbl">Parch</label>
+            <input type="number" name="Parch" class="inp" placeholder="e.g. 0" step="any" min="0" required>
+          </div>
+          <div>
+            <label class="inp-lbl">Fare</label>
+            <input type="number" name="Fare" class="inp" placeholder="e.g. 0" step="any" min="0" required>
+          </div>
+          <div>
+            <label class="inp-lbl">Name</label>
+            <input type="text" name="Name" class="inp" placeholder="Enter value" required>
+          </div>
+          <div>
+            <label class="inp-lbl">Sex</label>
+            <input type="text" name="Sex" class="inp" placeholder="Enter value" required>
+          </div>
+          <div>
+            <label class="inp-lbl">Ticket</label>
+            <input type="text" name="Ticket" class="inp" placeholder="Enter value" required>
+          </div>
+          <div>
+            <label class="inp-lbl">Embarked</label>
+            <input type="text" name="Embarked" class="inp" placeholder="Enter value" required>
+          </div>
+            </div>
+            <button type="submit" class="btn-predict" id="pBtn">
+              <span id="btnTxt">Predict</span>
+            </button>
+          </form>
+
+          <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08)">
+            <div style="color:rgba(255,255,255,.25);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">About this model</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+              <div class="mini-stat">
+                <div style="color:rgba(255,255,255,.35);font-size:.7rem;margin-bottom:4px">Algorithm</div>
+                <div style="color:#fff;font-weight:600;font-size:.82rem">Gradient Boosting</div>
+              </div>
+              <div class="mini-stat">
+                <div style="color:rgba(255,255,255,.35);font-size:.7rem;margin-bottom:4px">Accuracy</div>
+                <div style="color:#facc15;font-weight:700;font-size:.82rem">82.5%</div>
+              </div>
+              <div class="mini-stat">
+                <div style="color:rgba(255,255,255,.35);font-size:.7rem;margin-bottom:4px">Classes</div>
+                <div style="color:#fff;font-weight:600;font-size:.82rem">2</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="field">
-          <label>Pclass</label>
-          <input type="number" name="Pclass" placeholder="e.g. 0" step="any">
-        </div>
-        <div class="field">
-          <label>Age</label>
-          <input type="number" name="Age" placeholder="e.g. 0" step="any">
-        </div>
-        <div class="field">
-          <label>Sibsp</label>
-          <input type="number" name="SibSp" placeholder="e.g. 0" step="any">
-        </div>
-        <div class="field">
-          <label>Parch</label>
-          <input type="number" name="Parch" placeholder="e.g. 0" step="any">
-        </div>
-        <div class="field">
-          <label>Fare</label>
-          <input type="number" name="Fare" placeholder="e.g. 0" step="any">
-        </div>
-        <div class="field">
-          <label>Name</label>
-          <input type="text" name="Name" placeholder="Enter value">
-        </div>
-        <div class="field">
-          <label>Sex</label>
-          <input type="text" name="Sex" placeholder="Enter value">
-        </div>
-        <div class="field">
-          <label>Ticket</label>
-          <input type="text" name="Ticket" placeholder="Enter value">
-        </div>
-        <div class="field">
-          <label>Embarked</label>
-          <input type="text" name="Embarked" placeholder="Enter value">
+
+        <!-- RIGHT: Results Panel -->
+        <div class="glass" style="border-radius:20px;padding:28px;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+            <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#1565c0,#1565c0);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.3)">◎</div>
+            <div>
+              <div style="color:#fff;font-weight:700;font-size:1.05rem">Prediction Result</div>
+              <div style="color:rgba(255,255,255,.38);font-size:.82rem">Output from your trained model</div>
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div id="emptyState" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 0">
+            <div style="width:56px;height:56px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;font-size:1.7rem;margin-bottom:14px">🤖</div>
+            <div style="color:rgba(255,255,255,.38);font-weight:500">No prediction yet</div>
+            <div style="color:rgba(255,255,255,.22);font-size:.85rem;margin-top:6px">Fill in the form and hit Predict</div>
+          </div>
+
+          <!-- Result state -->
+          <div id="resultState" style="display:none;flex:1;flex-direction:column">
+
+            <div style="text-align:center;margin-bottom:24px">
+              <div class="badge" style="margin-bottom:12px">
+                <span>●</span> <span id="resLabel">Result</span>
+              </div>
+              <div id="resVal" style="font-size:2.6rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-0.5px;line-height:1.1">&#8212;</div>
+              <div id="resConf" style="color:rgba(255,255,255,.45);font-size:.9rem"></div>
+            </div>
+
+            <div id="probSec" style="display:none;margin-bottom:20px">
+              <div style="color:rgba(255,255,255,.28);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px">Class Probabilities</div>
+              <div id="probBars"></div>
+            </div>
+
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;margin-top:auto">
+              <div style="color:rgba(255,255,255,.28);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Input Summary</div>
+              <div id="inputSummary" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:.84rem"></div>
+            </div>
+
+          </div>
+
+          <!-- Error state -->
+          <div id="errState" style="display:none">
+            <div class="err-box" id="errMsg"></div>
+          </div>
+
         </div>
       </div>
-      <button type="submit" class="btn-p" id="pBtn">&#x1F50D;&nbsp; Predict</button>
-    </form>
-    <div class="result" id="result">
-      <div class="res-row">
-        <span class="res-lbl">Prediction</span>
-        <span class="res-val" id="resVal">—</span>
+
+      <!-- Footer -->
+      <div style="text-align:center;margin-top:40px">
+        <p style="color:rgba(255,255,255,.18);font-size:.82rem">
+          Powered by
+          <span style="color:rgba(255,255,255,.35);font-weight:600">FastAPI</span> &middot;
+          <span style="color:rgba(255,255,255,.35);font-weight:600">scikit-learn</span> &middot;
+          Built with <span style="color:rgba(255,255,255,.35);font-weight:600">&#10022; AI</span>
+        </p>
       </div>
-      <div class="prob-sec" id="probSec" style="display:none">
-        <div class="prob-ttl">Confidence</div>
-        <div id="probBars"></div>
-      </div>
-      <div class="err" id="errMsg"></div>
+
     </div>
   </div>
-</div>
-
-<div class="ftr">
-  Powered by <a href="/docs" target="_blank">FastAPI ML API</a> &nbsp;&middot;&nbsp; <a href="/health" target="_blank">Health check</a>
-</div>
 
 <script>
   var IS_CLASS = true;
   var CLASSES  = ["0", "1"];
 
-  var form    = document.getElementById("pForm");
-  var result  = document.getElementById("result");
-  var resVal  = document.getElementById("resVal");
-  var probSec = document.getElementById("probSec");
-  var probBars= document.getElementById("probBars");
-  var errMsg  = document.getElementById("errMsg");
-  var pBtn    = document.getElementById("pBtn");
-  var srvDot  = document.getElementById("srvDot");
-  var srvTxt  = document.getElementById("srvTxt");
+  var pForm       = document.getElementById('pForm');
+  var pBtn        = document.getElementById('pBtn');
+  var btnTxt      = document.getElementById('btnTxt');
+  var srvDot      = document.getElementById('srvDot');
+  var srvTxt      = document.getElementById('srvTxt');
+  var emptyState  = document.getElementById('emptyState');
+  var resultState = document.getElementById('resultState');
+  var errState    = document.getElementById('errState');
+  var resVal      = document.getElementById('resVal');
+  var resConf     = document.getElementById('resConf');
+  var resLabel    = document.getElementById('resLabel');
+  var probSec     = document.getElementById('probSec');
+  var probBars    = document.getElementById('probBars');
+  var errMsg      = document.getElementById('errMsg');
+  var inputSum    = document.getElementById('inputSummary');
 
-  // ── Server health check with cold-start retry ───────────────────
-  // Render free tier spins down after 15 min; the model takes a few
-  // seconds to load after waking up.  We poll /health every 5 s and
-  // keep the Predict button disabled until the server is truly ready.
+  // ── Server health check with cold-start retry ──────────────────────────────
   var _healthTimer = null;
   var _serverReady = false;
 
   function setServerState(state, msg) {
-    srvDot.className = "srv-dot " + state;
+    srvDot.className = 'srv-dot ' + state;
     srvTxt.textContent = msg;
-    _serverReady = (state === "online");
+    _serverReady = (state === 'online');
     pBtn.disabled = !_serverReady;
-    pBtn.style.opacity = _serverReady ? "1" : "0.5";
-    pBtn.title = _serverReady ? "" : "Waiting for server to become readyâ¦";
+    pBtn.title = _serverReady ? '' : 'Waiting for server…';
   }
 
   function checkServer() {
-    setServerState("checking", "Checking serverâ¦");
-    fetch("/health")
+    setServerState('checking', 'Checking server…');
+    fetch('/health')
       .then(function(r) {
         if (r.ok) {
           return r.json().then(function(d) {
-            if (d && d.status === "ok") {
-              setServerState("online", "Server online");
+            if (d && d.status === 'ok') {
+              setServerState('online', 'Server online');
               if (_healthTimer) { clearInterval(_healthTimer); _healthTimer = null; }
             } else {
-              setServerState("offline", "Server warming upâ¦ retrying");
+              setServerState('offline', 'Server warming up… retrying');
             }
           });
         } else {
-          setServerState("offline", "Server error (HTTP " + r.status + ") â retrying");
+          setServerState('offline', 'Server error (HTTP ' + r.status + ') — retrying');
         }
       })
       .catch(function() {
-        setServerState("offline", "Server offline â run: uvicorn app:app --reload");
+        setServerState('offline', 'Server offline — run: uvicorn app:app --reload');
         if (_healthTimer) { clearInterval(_healthTimer); _healthTimer = null; }
       });
   }
   checkServer();
   _healthTimer = setInterval(checkServer, 5000);
 
-  form.addEventListener("submit", function(e) {
+  // ── Form submit ────────────────────────────────────────────────────────────
+  pForm.addEventListener('submit', function(e) {
     e.preventDefault();
     if (!_serverReady) {
-      errMsg.style.whiteSpace = "pre-wrap";
-      errMsg.textContent = "Server is not ready yet.\nPlease wait until the status shows Server online.";
-      result.classList.add("show");
+      showError('Server is not ready yet.\nPlease wait until the status shows Server online.');
       return;
     }
+
     var payload = {};
-    form.querySelectorAll("input").forEach(function(el) {
+    var summary = [];
+    pForm.querySelectorAll('input').forEach(function(el) {
       var v = el.value.trim();
-      if (v !== "") payload[el.name] = (el.type === "number" && !isNaN(v)) ? parseFloat(v) : v;
+      if (v !== '') {
+        payload[el.name] = (el.type === 'number' && !isNaN(v)) ? parseFloat(v) : v;
+        var lbl = el.previousElementSibling ? el.previousElementSibling.textContent.trim() : el.name;
+        summary.push([lbl, v]);
+      }
     });
+    if (Object.keys(payload).length === 0) {
+      showError('Please fill in at least one field before predicting.');
+      return;
+    }
 
     pBtn.disabled = true;
-    pBtn.innerHTML = '<span class="spin"></span>Predicting&#x2026;';
-    result.classList.remove("show");
-    errMsg.textContent = "";
-    probSec.style.display = "none";
-    probBars.innerHTML = "";
+    btnTxt.innerHTML = '<span class="spinner"></span>Predicting…';
+    emptyState.style.display  = 'none';
+    resultState.style.display = 'none';
+    errState.style.display    = 'none';
 
-    fetch("/predict", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
+    fetch('/predict', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     })
     .then(function(r) {
-      if (!r.ok) return r.text().then(function(t) { throw new Error("API " + r.status + ": " + t); });
+      if (!r.ok) return r.text().then(function(t) { throw new Error('API ' + r.status + ': ' + t); });
       return r.json();
     })
     .then(function(data) {
-      resVal.textContent = data.prediction;
-      if (IS_CLASS && data.probabilities) {
-        var probs  = Array.isArray(data.probabilities) ? data.probabilities : Object.values(data.probabilities);
-        var labels = CLASSES.length ? CLASSES : probs.map(function(_,i){ return "Class " + i; });
-        labels.forEach(function(cls, i) {
-          var pct = ((probs[i] || 0) * 100).toFixed(1);
-          var d = document.createElement("div");
-          d.className = "prob-item";
-          d.innerHTML = '<div class="prob-hdr"><span>' + cls + '</span><span>' + pct + '%</span></div>'
-                      + '<div class="prob-bg"><div class="prob-fill" data-p="' + pct + '"></div></div>';
-          probBars.appendChild(d);
-        });
-        probSec.style.display = "block";
-        setTimeout(function() {
-          document.querySelectorAll(".prob-fill").forEach(function(b) {
-            b.style.width = b.dataset.p + "%";
-          });
-        }, 60);
-      }
-      result.classList.add("show");
+      showResult(data, summary);
     })
     .catch(function(err) {
       var msg = err.message || String(err);
-      if (msg.indexOf("Failed to fetch") !== -1 || msg.indexOf("NetworkError") !== -1
-          || msg.indexOf("ERR_CONNECTION_REFUSED") !== -1 || err instanceof TypeError) {
-        msg = "⚠️ Cannot reach the API server.\n"
-            + "Make sure uvicorn is running:\n"
-            + "    uvicorn app:app --reload";
-        srvDot.className = "srv-dot offline";
-        srvTxt.textContent = "Server offline";
+      if (msg.indexOf('Failed to fetch') !== -1 || msg.indexOf('NetworkError') !== -1
+          || msg.indexOf('ERR_CONNECTION_REFUSED') !== -1 || err instanceof TypeError) {
+        msg = '⚠ Cannot reach the API server.\nThe server may have gone to sleep — please wait a moment.';
+        setServerState('offline', 'Server offline — retrying…');
+        if (!_healthTimer) _healthTimer = setInterval(checkServer, 5000);
       }
-      errMsg.style.whiteSpace = "pre-wrap";
-      errMsg.textContent = msg;
-      result.classList.add("show");
+      showError(msg);
     })
     .finally(function() {
       pBtn.disabled = !_serverReady;
-      pBtn.style.opacity = _serverReady ? "1" : "0.5";
-      pBtn.innerHTML = "&#x1F50D;&nbsp; Predict";
+      btnTxt.textContent = 'Predict Again';
     });
   });
+
+  function showResult(data, summary) {
+    function _fmt(s){return s.replace(/[-_]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});}
+    resVal.textContent = IS_CLASS ? _fmt(String(data.prediction)) : data.prediction;
+
+    if (IS_CLASS && data.probabilities) {
+      var probs  = Array.isArray(data.probabilities) ? data.probabilities : Object.values(data.probabilities);
+      var labels = CLASSES.length ? CLASSES : probs.map(function(_,i){ return 'Class ' + i; });
+      var maxP   = Math.max.apply(null, probs);
+
+      resLabel.textContent = 'Classified';
+      resConf.textContent  = 'Confidence: ' + (maxP * 100).toFixed(1) + '%';
+
+      probBars.innerHTML = '';
+      var pairs = labels.map(function(l,i){ return {l:l, p:probs[i]||0}; })
+                        .sort(function(a,b){ return b.p - a.p; });
+      pairs.forEach(function(item) {
+        var pct   = (item.p * 100).toFixed(1);
+        var isTop = item.p === maxP;
+        var d = document.createElement('div');
+        d.style.marginBottom = '12px';
+        d.innerHTML =
+          '<div style="display:flex;justify-content:space-between;margin-bottom:5px">' +
+            '<span style="font-size:.85rem;font-weight:' + (isTop ? '600' : '400') +
+            ';color:rgba(255,255,255,' + (isTop ? '.9' : '.45') + ')">' + _fmt(item.l) + '</span>' +
+            '<span style="font-size:.85rem;font-weight:700;color:rgba(255,255,255,' + (isTop ? '.95' : '.35') + ')">' + pct + '%</span>' +
+          '</div>' +
+          '<div class="conf-track"><div class="conf-fill" data-p="' + pct + '" style="width:0"></div></div>';
+        probBars.appendChild(d);
+      });
+      probSec.style.display = 'block';
+      setTimeout(function() {
+        document.querySelectorAll('.conf-fill').forEach(function(b) {
+          b.style.width = b.dataset.p + '%';
+        });
+      }, 60);
+    } else {
+      resLabel.textContent = 'Predicted Value';
+      resConf.textContent  = '';
+      probSec.style.display = 'none';
+    }
+
+    inputSum.innerHTML = '';
+    summary.forEach(function(pair) {
+      var d = document.createElement('div');
+      d.style.cssText = 'display:flex;justify-content:space-between';
+      d.innerHTML =
+        '<span style="color:rgba(255,255,255,.35)">' + pair[0] + '</span>' +
+        '<span style="color:#fff;font-weight:500">' + pair[1] + '</span>';
+      inputSum.appendChild(d);
+    });
+
+    resultState.style.display = 'flex';
+    resultState.classList.remove('fade-up');
+    void resultState.offsetWidth;
+    resultState.classList.add('fade-up');
+    errState.style.display = 'none';
+  }
+
+  function showError(msg) {
+    errMsg.textContent = msg;
+    errState.style.display    = 'block';
+    resultState.style.display = 'none';
+    emptyState.style.display  = 'none';
+  }
 </script>
 </body>
 </html>
