@@ -44,6 +44,13 @@
       font-size: .94rem; transition: all .2s; outline: none;
     }
     .inp::placeholder { color: rgba(255,255,255,.28); }
+    .inp:-webkit-autofill,
+    .inp:-webkit-autofill:hover,
+    .inp:-webkit-autofill:focus {
+      -webkit-text-fill-color: #fff;
+      -webkit-box-shadow: 0 0 0px 1000px rgba(255,255,255,.07) inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
     .inp:focus {
       background: rgba(255,255,255,.11);
       border-color: #1565c0;
