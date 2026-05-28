@@ -272,7 +272,7 @@
     var payload = {};
     form.querySelectorAll("input").forEach(function(el) {
       var v = el.value.trim();
-      if (v !== "") payload[el.name] = isNaN(v) ? v : parseFloat(v);
+      if (v !== "") payload[el.name] = (el.type === "number" && !isNaN(v)) ? parseFloat(v) : v;
     });
 
     pBtn.disabled = true;
