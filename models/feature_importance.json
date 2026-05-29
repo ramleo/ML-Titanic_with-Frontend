@@ -1,0 +1,62 @@
+[
+  {
+    "feature": "cat__Sex_male",
+    "importance": 1.0
+  },
+  {
+    "feature": "cat__Sex_female",
+    "importance": 0.7278
+  },
+  {
+    "feature": "num__Pclass",
+    "importance": 0.5757
+  },
+  {
+    "feature": "num__Age",
+    "importance": 0.3001
+  },
+  {
+    "feature": "num__Fare",
+    "importance": 0.1906
+  },
+  {
+    "feature": "num__PassengerId",
+    "importance": 0.1006
+  },
+  {
+    "feature": "cat__Ticket_1601",
+    "importance": 0.0862
+  },
+  {
+    "feature": "num__SibSp",
+    "importance": 0.0844
+  },
+  {
+    "feature": "cat__Embarked_S",
+    "importance": 0.0723
+  },
+  {
+    "feature": "cat__Ticket_347077",
+    "importance": 0.0253
+  },
+  {
+    "feature": "cat__Name_Allison, Mrs. Hudson J C (Bessie Waldo Daniels)",
+    "importance": 0.0244
+  },
+  {
+    "feature": "cat__Name_Ling, Mr. Lee",
+    "importance": 0.0194
+  },
+  {
+    "feature": "cat__Name_Turpin, Mrs. William John Robert (Dorothy Ann Wonnacott)",
+    "importance": 0.0169
+  },
+  {
+    "feature": "cat__Name_Isham, Miss. Ann Elizabeth",
+    "importance": 0.0167
+  },
+  {
+    "feature": "cat__Name_Beane, Mr. Edward",
+    "importance": 0.0165
+  }
+]

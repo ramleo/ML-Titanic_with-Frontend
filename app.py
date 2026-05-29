@@ -48,7 +48,8 @@ def predict(data: InputData):
     pred = pipeline.predict(df)[0]
     label = label_encoder.inverse_transform([pred])[0]
     proba = pipeline.predict_proba(df)[0].tolist()
-    return {"prediction": str(label), "probabilities": proba}
+    return {"prediction": str(label), "probabilities": proba,
+            "feature_importance": _feature_importance}
 
 @app.post("/predict/batch")
 def predict_batch(data: List[InputData]):
@@ -71,6 +72,10 @@ async def predict_upload(file: UploadFile = File(...)):
         labels_up = [str(p) for p in preds_up]
     return {"count": len(labels_up), "predictions": labels_up}
 
+
+@app.get("/importance")
+def importance():
+    return {"feature_importance": _feature_importance}
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
