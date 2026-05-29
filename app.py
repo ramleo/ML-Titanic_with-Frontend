@@ -20,7 +20,6 @@ _feature_importance = json.load(open(_fi_file)) if os.path.exists(_fi_file) else
 label_encoder = joblib.load("models/label_encoder.pkl")
 
 class InputData(BaseModel):
-    PassengerId: Optional[float] = None
     Pclass: Optional[float] = None
     Age: Optional[float] = None
     SibSp: Optional[float] = None
@@ -30,6 +29,8 @@ class InputData(BaseModel):
     Sex: Optional[str] = None
     Ticket: Optional[str] = None
     Embarked: Optional[str] = None
+
+_ID_COLS = ["PassengerId"]  # pipeline trained with this; injected as NaN at predict time
 
 @app.get("/")
 def index():
@@ -45,6 +46,8 @@ def health():
 @app.post("/predict")
 def predict(data: InputData):
     df = pd.DataFrame([data.dict()])
+    for col in _ID_COLS:
+        df[col] = float('nan')
     pred = pipeline.predict(df)[0]
     label = label_encoder.inverse_transform([pred])[0]
     proba = pipeline.predict_proba(df)[0].tolist()
@@ -54,6 +57,8 @@ def predict(data: InputData):
 @app.post("/predict/batch")
 def predict_batch(data: List[InputData]):
     df = pd.DataFrame([d.dict() for d in data])
+    for col in _ID_COLS:
+        df[col] = float('nan')
     preds = pipeline.predict(df)
     labels = label_encoder.inverse_transform(preds).tolist()
     return {"predictions": [str(l) for l in labels]}
