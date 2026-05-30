@@ -17,6 +17,7 @@ app.add_middleware(
 pipeline = joblib.load("models/final_pipeline.pkl")
 _fi_file = "models/feature_importance.json"
 _feature_importance = json.load(open(_fi_file)) if os.path.exists(_fi_file) else []
+_ranges   = json.load(open("models/feature_ranges.json")) if os.path.exists("models/feature_ranges.json") else {}
 label_encoder = joblib.load("models/label_encoder.pkl")
 
 class InputData(BaseModel):
@@ -77,6 +78,10 @@ async def predict_upload(file: UploadFile = File(...)):
         labels_up = [str(p) for p in preds_up]
     return {"count": len(labels_up), "predictions": labels_up}
 
+
+@app.get("/ranges")
+def ranges_endpoint():
+    return _ranges
 
 @app.get("/importance")
 def importance():

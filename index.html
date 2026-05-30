@@ -140,6 +140,20 @@
 
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 3px; }
+    .slider { -webkit-appearance:none; appearance:none; width:100%; height:4px; margin-top:6px;
+      background:rgba(255,255,255,.13); border-radius:99px; outline:none; cursor:pointer; display:block; }
+    .slider::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px;
+      border-radius:50%; background:#1565c0; cursor:pointer; box-shadow:0 0 6px #1565c066; }
+    .slider::-moz-range-thumb { width:14px; height:14px; border-radius:50%;
+      background:#1565c0; cursor:pointer; border:none; }
+    .hist-table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    .hist-table th { padding:8px 12px; text-align:left; color:rgba(255,255,255,.3); font-size:.68rem;
+      font-weight:700; text-transform:uppercase; letter-spacing:.06em; border-bottom:1px solid rgba(255,255,255,.08); white-space:nowrap; }
+    .hist-table td { padding:9px 12px; color:rgba(255,255,255,.65); border-bottom:1px solid rgba(255,255,255,.04); white-space:nowrap; }
+    .hist-table tr:last-child td { border-bottom:none; }
+    .hist-table tr:hover td { background:rgba(255,255,255,.03); }
+    .hist-table .pred-col { color:#fff; font-weight:700; }
+    .hist-table .run-col  { color:rgba(255,255,255,.25); }
 
     @media (max-width: 768px) {
       #mainGrid { grid-template-columns: 1fr !important; }
@@ -315,6 +329,18 @@
             <div class="err-box" id="errMsg"></div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- Comparison table -->
+      <div id="histSection" style="display:none;margin-top:24px">
+        <div class="glass" style="border-radius:16px;padding:20px 24px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div><span style="color:#fff;font-weight:700;font-size:.95rem">Prediction History</span>
+            <span id="histCount" style="color:rgba(255,255,255,.3);font-size:.8rem;margin-left:8px"></span></div>
+            <button onclick="clearHistory()" style="padding:5px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.55);font-size:.78rem;cursor:pointer">Clear</button>
+          </div>
+          <div style="overflow-x:auto"><table class="hist-table"><thead id="histHead"></thead><tbody id="histBody"></tbody></table></div>
         </div>
       </div>
 
@@ -536,6 +562,71 @@
     resultState.classList.add('fade-up');
     errState.style.display = 'none';
   }
+
+
+  // ── Sliders ────────────────────────────────────────────────────────────────
+  var _debounceTimer = null;
+  function debouncedPredict(ms) {
+    clearTimeout(_debounceTimer);
+    _debounceTimer = setTimeout(function() {
+      if (_serverReady) pForm.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+    }, ms || 400);
+  }
+  function initSliders(ranges) {
+    document.querySelectorAll('.inp[type="number"]').forEach(function(inp) {
+      var fname = inp.name, key = fname.replace(/\s+/g,'_');
+      var r = (ranges && ranges[fname]) || {min:0, max:100, step:1};
+      var lbl = inp.parentElement.querySelector('.inp-lbl');
+      if (lbl && !lbl.querySelector('.sv')) {
+        var sv = document.createElement('span'); sv.className='sv'; sv.id='sv_'+key;
+        sv.style.cssText='float:right;color:#1565c0;font-size:.73rem;font-weight:600';
+        lbl.appendChild(sv);
+      }
+      if (!document.getElementById('sl_'+key)) {
+        var sl = document.createElement('input'); sl.type='range'; sl.className='slider';
+        sl.id='sl_'+key; sl.min=r.min; sl.max=r.max; sl.step=r.step;
+        inp.parentElement.appendChild(sl);
+        var sv2 = document.getElementById('sv_'+key);
+        inp.addEventListener('input', function() {
+          var v=parseFloat(this.value);
+          if (!isNaN(v)&&v>=0){if(v>parseFloat(sl.max))sl.max=Math.ceil(v*2);sl.value=v;if(sv2)sv2.textContent=v.toLocaleString();}
+          else{if(sv2)sv2.textContent='';}
+          debouncedPredict(420);
+        });
+        sl.addEventListener('input', function() {
+          inp.value=this.value; if(sv2)sv2.textContent=Number(this.value).toLocaleString(); debouncedPredict(300);
+        });
+      }
+    });
+  }
+  fetch('/ranges').then(function(r){return r.json();}).then(function(rng){initSliders(rng);}).catch(function(){initSliders(null);});
+
+  // ── Prediction history ──────────────────────────────────────────────────────
+  var _history=[], _histKeyFields=['Pclass','Age','Fare','Sex'];
+  function addToHistory(data) {
+    var e={inputs:{},prediction:data.prediction,probabilities:data.probabilities};
+    document.querySelectorAll('#pForm .inp').forEach(function(inp){if(inp.value!=='')e.inputs[inp.name]=inp.value;});
+    _history.push(e); renderHistory();
+  }
+  function renderHistory() {
+    if(_history.length<2) return;
+    document.getElementById('histSection').style.display='block';
+    document.getElementById('histCount').textContent='('+_history.length+' runs)';
+    var cols=['#'].concat(_histKeyFields).concat(IS_CLASS?['Prediction','Confidence']:['Prediction']);
+    document.getElementById('histHead').innerHTML='<tr>'+cols.map(function(c){return'<th>'+c+'</th>';}).join('')+'</tr>';
+    document.getElementById('histBody').innerHTML=_history.map(function(e,i){
+      var prev=i>0?_history[i-1]:null;
+      var cells=_histKeyFields.map(function(col){
+        var v=e.inputs[col]!==undefined?e.inputs[col]:'—';
+        var changed=prev&&prev.inputs[col]!==e.inputs[col];
+        return '<td style="'+(changed?'color:#fff;font-weight:600':'')+'">'+(isNaN(v)?v:Number(v).toLocaleString())+'</td>';
+      });
+      var predExtra='';
+      if(IS_CLASS&&e.probabilities){var maxP=Math.max.apply(null,e.probabilities);predExtra='<td>'+(maxP*100).toFixed(1)+'%</td>';}
+      return '<tr><td class="run-col">'+(i+1)+'</td>'+cells.join('')+'<td class="pred-col">'+String(e.prediction)+'</td>'+predExtra+'</tr>';
+    }).join('');
+  }
+  function clearHistory(){ _history=[]; document.getElementById('histSection').style.display='none'; }
 
   function showError(msg) {
     errMsg.textContent = msg;
