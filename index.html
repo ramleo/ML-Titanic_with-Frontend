@@ -586,15 +586,22 @@
         var sl = document.createElement('input'); sl.type='range'; sl.className='slider';
         sl.id='sl_'+key; sl.min=r.min; sl.max=r.max; sl.step=r.step;
         inp.parentElement.appendChild(sl);
+        // Apply range constraints to number input
+        inp.min=r.min; inp.max=r.max; inp.step=r.step;
+        inp.placeholder=r.min+' – '+Math.round(r.max);
         var sv2 = document.getElementById('sv_'+key);
         inp.addEventListener('input', function() {
           var v=parseFloat(this.value);
           if (!isNaN(v)&&v>=0){if(v>parseFloat(sl.max))sl.max=Math.ceil(v*2);sl.value=v;if(sv2)sv2.textContent=v.toLocaleString();}
           else{if(sv2)sv2.textContent='';}
-          debouncedPredict(420);
+        });
+        inp.addEventListener('blur', function() {
+          var v=parseFloat(this.value),mn=parseFloat(this.min),mx=parseFloat(this.max);
+          if(!isNaN(v)){if(!isNaN(mn)&&v<mn){this.value=mn;sl.value=mn;if(sv2)sv2.textContent=mn.toLocaleString();}
+          if(!isNaN(mx)&&v>mx){this.value=mx;sl.value=mx;if(sv2)sv2.textContent=mx.toLocaleString();}}
         });
         sl.addEventListener('input', function() {
-          inp.value=this.value; if(sv2)sv2.textContent=Number(this.value).toLocaleString(); debouncedPredict(300);
+          inp.value=this.value; if(sv2)sv2.textContent=Number(this.value).toLocaleString();
         });
       }
     });
